@@ -5,6 +5,9 @@ import {
   createEmployee,
   modifyEmployee,
   removeEmployee,
+  sendOTP,
+  otpVerification,
+  resetPassword,
 } from "../services/employee_services.ts";
 
 export const getEmployees = async (req: Request, res: Response) => {
@@ -78,6 +81,53 @@ export const deleteEmployee = async (req: Request, res: Response) => {
       .catch((err) => {
         res.status(500).json({ message: err.message });
       });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
+};
+
+export const forgetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    sendOTP(email)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
+};
+
+export const verifyOTP = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+    otpVerification(email, otp)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
+};
+
+export const resetPass = async (req: Request, res: Response) => {
+  try {
+    const {token,password} = req.body;
+    resetPassword(token,password).then((response) => {
+      res.status(response.status).json(response);
+    }).catch((err) => {
+      res.status(500).json({ message: err.message });
+    });  
+
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error.";
     res.status(500).json({ message: message });

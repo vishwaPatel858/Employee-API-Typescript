@@ -1,6 +1,13 @@
 import { EmployeeType } from "../Types/employee_types.ts";
 import { Employee } from "../model/employee.model.ts";
 import { generateEncryptedPassword } from "../Utility/employee_utility.ts";
+import { generateOtp, sendMail } from "../Utility/email_utility.ts";
+import { redisClient } from "../Utility/redisClient.ts";
+import {
+  generateRefreshToken,
+  generateAccessToken,
+} from "../Utility/token_utility.ts";
+redisClient.connect();
 
 export const getAllEmployees = async () => {
   try {
@@ -99,6 +106,90 @@ export const removeEmployee = async (id: string) => {
         status: 400,
       };
     }
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const sendOTP = async (userEmail: string) => {
+  try {
+    const otp = generateOtp();
+    await redisClient.del(userEmail);
+    await redisClient.set(userEmail, otp);
+    const option = {
+      to: userEmail,
+      subject: "OTP for forgget password",
+      message: `your otp is <strong>${otp}</strong>`,
+    };
+    let response = {
+      message: `Something went wrong`,
+      status: 500,
+    };
+    await sendMail(option)  
+      .then((res) => {
+        response = {
+          message: "OTP sent successfully",
+          status: 200,
+        };
+        setTimeout(async() => {
+          await redisClient.del(userEmail);
+          console.log("OTP deleted after 1 minute")
+        },60000);
+      })
+      .catch((err) => {
+        throw err;
+      });
+    return response;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const otpVerification = async (email: string, otp: string) => {
+  try {
+    const actualOTP = await redisClient.get(email);
+    if (actualOTP == otp) {
+      await redisClient.del(email);
+      const employee = await Employee.findOne({ email: email });
+      if (!employee) {
+        return {
+          message: "Employee not found",
+          status: 404,
+        };
+      }
+      const refreshToken = await generateRefreshToken(employee.id);
+      const accessToken = await generateAccessToken(employee.id);
+      return {
+        message: "otp verified successfully",
+        status: 200,
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      };
+    } else {
+      return { message: "Invalid OTP", status: 401 };
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const resetPassword = async (token: string, password: string) => {
+  try {
+    const id = await redisClient.get(token);
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      return {
+        message: "Employee not found",
+        status: 404,
+      };
+    }
+    let encryptedPass = await generateEncryptedPassword(password);
+    employee.password = encryptedPass;
+    const updatedEmployee = await Employee.findByIdAndUpdate(id, employee);
+    return {
+      status: 200,
+      message: "Password updated successfully",
+    };
   } catch (err) {
     throw err;
   }

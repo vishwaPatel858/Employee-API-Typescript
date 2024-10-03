@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.redisRefreshTokenRouter = exports.router = void 0;
+var express_1 = require("express");
+exports.router = express_1.default.Router();
+exports.redisRefreshTokenRouter = express_1.default.Router();
+var employeeSchema = require("../validations/employee_validations.ts").employeeSchema;
+var validate = require("../middleware/employee_middleware.ts").validate;
+var _a = require("../controllers/employee_controller.ts"), getEmployees = _a.getEmployees, employeeById = _a.employeeById, addEmployee = _a.addEmployee, updateEmployee = _a.updateEmployee, deleteEmployee = _a.deleteEmployee;
+exports.router.get("/", getEmployees);
+exports.router.get("/:id", employeeById);
+exports.router.post("/", validate(employeeSchema), addEmployee);
+exports.router.put("/:id", validate(employeeSchema), updateEmployee);
+exports.router.delete("/:id", deleteEmployee);
