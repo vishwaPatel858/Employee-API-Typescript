@@ -8,6 +8,8 @@ import {
   sendOTP,
   otpVerification,
   resetPassword,
+  loginService,
+  logoutService,
 } from "../services/employee_services.ts";
 
 export const getEmployees = async (req: Request, res: Response) => {
@@ -121,13 +123,46 @@ export const verifyOTP = async (req: Request, res: Response) => {
 
 export const resetPass = async (req: Request, res: Response) => {
   try {
-    const {token,password} = req.body;
-    resetPassword(token,password).then((response) => {
-      res.status(response.status).json(response);
-    }).catch((err) => {
-      res.status(500).json({ message: err.message });
-    });  
+    const { token, password } = req.body;
+    resetPassword(token, password)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
+};
 
+export const login = (req: Request, res: Response) => {
+  try {
+    const { id, password } = req.body;
+    loginService(id, password)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
+};
+
+export const logout = (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+    logoutService(token)
+      .then((response) => {
+        res.status(response.status).json(response);
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err.message });
+      });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error.";
     res.status(500).json({ message: message });

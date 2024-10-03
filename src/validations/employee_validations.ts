@@ -41,4 +41,8 @@ export const passwordSchema = Joi.object({
     }),
 });
 
-
+export const tokenSchema = Joi.object({
+  token: Joi.string().required().messages({
+    "string.empty": "Token is required.",
+  }),
+});

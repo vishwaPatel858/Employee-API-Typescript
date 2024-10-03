@@ -23,3 +23,22 @@ export const generateRefreshToken = async (id: string) => {
   redisClient.set(refreshToken, id);
   return refreshToken;
 };
+
+export const verifyTokenData = async (token: string, secretKey: string) => {
+  try {
+    const decode = await jwt.verify(
+      token,
+      secretKey,
+      (err: any, decoded: any) => {
+        if (err) {
+          throw err;
+        } else {
+          return decoded;
+        }
+      }
+    );
+    return decode;
+  } catch (err) {
+    throw err;
+  }
+};
