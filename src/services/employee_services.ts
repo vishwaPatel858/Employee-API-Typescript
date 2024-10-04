@@ -177,9 +177,10 @@ export const otpVerification = async (email: string, otp: string) => {
 
 export const resetPassword = async (token: string, password: string) => {
   try {
-    const id = await redisClient.get(token);
-    const Res = verifyTokenData(token, "dev-ipqn463hzjuhm4wx")
+    const secretKey = process.env.JWT_Access_SECRET || "dev-ipqn463hzjuhm4wx";
+    const Res = verifyTokenData(token, secretKey)
       .then(async (response) => {
+        const id = response.id;
         const employee = await Employee.findById(id);
         if (!employee) {
           return {
@@ -187,8 +188,7 @@ export const resetPassword = async (token: string, password: string) => {
             status: 404,
           };
         }
-        let encryptedPass = await generateEncryptedPassword(password);
-        employee.password = encryptedPass;
+        employee.password = await generateEncryptedPassword(password);
         const updatedEmployee = await Employee.findByIdAndUpdate(id, employee);
         return {
           status: 200,
@@ -238,13 +238,6 @@ export const loginService = async (id: string, password: string) => {
 
 export const logoutService = async (token: string) => {
   try {
-    const redis_token = await redisClient.get(token);
-    if (!redis_token) {
-      return {
-        message: "Invalid token",
-        status: 401,
-      };
-    }
     const deletedToken = await redisClient.del(token);
     if (deletedToken == 1) {
       return {

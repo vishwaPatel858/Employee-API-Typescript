@@ -4,12 +4,18 @@ export const redisRefreshTokenRouter = express.Router();
 const {
   employeeSchema,
   passwordSchema,
-  tokenSchema
+  tokenSchema,
+  loginSchema,
+  emailSchema,
+  verifyOTPSchema,
 } = require("../validations/employee_validations.ts");
 const {
   validate,
   validatePasswords,
   verifyToken,
+  validateLogin,
+  validateEmail,
+  validateOTP,
 } = require("../middleware/employee_middleware.ts");
 const {
   getEmployees,
@@ -29,9 +35,9 @@ router.get("/:id", employeeById);
 router.post("/", validate(employeeSchema), addEmployee);
 router.put("/:id", validate(employeeSchema), updateEmployee);
 router.delete("/:id", deleteEmployee);
-router.post("/forgetpassword", forgetPassword);
-router.post("/verifyotp", verifyOTP);
+router.post("/forgetpassword", validateEmail(emailSchema), forgetPassword);
+router.post("/verifyotp", validateOTP(verifyOTPSchema), verifyOTP);
 router.post("/resetpassword", validatePasswords(passwordSchema), resetPass);
-router.post("/login", login);
-router.post("/logout", logout);
+router.post("/login", validateLogin(loginSchema), login);
+router.post("/logout", verifyToken(tokenSchema), logout);
 router.post("/profile", verifyToken(tokenSchema), employeeById);

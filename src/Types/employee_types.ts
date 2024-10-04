@@ -4,8 +4,13 @@ export interface EmployeeType {
   password: string;
 }
 
-export interface ResetPass{
+export interface ResetPass {
   password: string;
   reentered_password: string;
   token: string;
+}
+
+export interface Login {
+  id: string;
+  password: string;
 }
