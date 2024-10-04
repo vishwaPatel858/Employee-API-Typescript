@@ -1,7 +1,6 @@
 import Joi from "joi";
 import { Request, Response, NextFunction, response } from "express";
 import { EmployeeType, ResetPass, Login } from "../Types/employee_types.ts";
-import { redisClient } from "../Utility/redisClient.ts";
 import { verifyTokenData } from "../Utility/token_utility.ts";
 export const validate = (schema: Joi.Schema) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -25,15 +24,6 @@ export const validate = (schema: Joi.Schema) => {
 export const validatePasswords = (schema: Joi.Schema) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      /*
-      const resetPassip: ResetPass = req.body;
-      if (resetPassip.password != resetPassip.reentered_password) {
-        res.status(400).json({ message: "Passwords do not match" });
-      } else {
-        const isValidPass: ResetPass = await schema.validateAsync(req.body);
-        req.body = isValidPass;
-        next();
-      }*/
       const resetPass: ResetPass = await schema.validateAsync(req.body);
       req.body = resetPass;
       if (resetPass.password != resetPass.reentered_password) {

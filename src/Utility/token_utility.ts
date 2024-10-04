@@ -8,6 +8,7 @@ export const generateAccessToken = async (id: string) => {
       expiresIn: 3600,
     }
   );
+  redisClient.set(accessToken, id);
   return accessToken;
 };
 
