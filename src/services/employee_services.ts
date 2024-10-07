@@ -1,5 +1,8 @@
 import { EmployeeType } from "../Types/employee_types.ts";
+import { Request, Response } from "express";
 import { Employee } from "../model/employee.model.ts";
+import multer from "multer";
+import path from "path";
 import {
   generateEncryptedPassword,
   validatePassword,
@@ -253,4 +256,65 @@ export const logoutService = async (token: string) => {
   } catch (err) {
     throw err;
   }
+};
+const storage = multer.diskStorage({
+  destination: "./uploads/",
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 },
+  fileFilter: (req, file, cb) => checkFileType(file, cb),
+}).single("file");
+
+const uploadMultiple = multer({
+  storage: storage,
+  limits: { fileSize: 1000000 },
+  fileFilter: (req, file, cb) => checkFileType(file, cb),
+}).array("files");
+
+const checkFileType = (
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  const filetypes = /jpeg|jpg|png|gif/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Error: Images only! (jpeg, jpg, png, gif)"));
+  }
+};
+
+export const FileUpload = (req: Request, res: Response) => {
+  return upload(req, res, (err) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "File Not Found" });
+    }
+    res.status(200).json({ message: "File uploaded!" });
+  });
+};
+
+export const FileUploadMultiple = (req: Request, res: Response) => {
+  return uploadMultiple(req, res, (err) => {
+    if (err) {
+      return res.status(500).json({ message: err.message });
+    }
+    if (!req.files) {
+      return res.status(400).json({ error: "File Not Found" });
+    }else{
+      res.status(200).json({ message: "File uploaded!" });
+    }
+  });
 };

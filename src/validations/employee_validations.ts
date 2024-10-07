@@ -40,7 +40,7 @@ export const passwordSchema = Joi.object({
         "Password must contain 1 Uppercase letter , 1 lowercase letter , 1 digit and 1 special character.Password length must be minimum 8 and maximum 10 characters.",
     }),
   reentered_password: Joi.string().required().messages({
-    "string.empty": "Please re-enter a password",
+    "string.empty": "Please re-enter is required",
   }),
   token: Joi.string().required().messages({
     "string.empty": "Please provide a token",

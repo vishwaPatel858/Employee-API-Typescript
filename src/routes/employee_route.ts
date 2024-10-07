@@ -16,6 +16,7 @@ const {
   validateLogin,
   validateEmail,
   validateOTP,
+  validateFileUpload,
 } = require("../middleware/employee_middleware.ts");
 const {
   getEmployees,
@@ -28,8 +29,14 @@ const {
   resetPass,
   login,
   logout,
+  fileUpload,
+  fileUploadMultiple,
+  fileUploadWithValidations,
+  fileUploadWithValidationsMutiple,
 } = require("../controllers/employee_controller.ts");
 
+import multer from "multer";
+const uploader = multer({ dest: "uploads/" });
 router.get("/", getEmployees);
 router.get("/:id", employeeById);
 router.post("/", validate(employeeSchema), addEmployee);
@@ -41,3 +48,7 @@ router.post("/resetpassword", validatePasswords(passwordSchema), resetPass);
 router.post("/login", validateLogin(loginSchema), login);
 router.post("/logout", verifyToken(tokenSchema), logout);
 router.post("/profile", verifyToken(tokenSchema), employeeById);
+router.post("/fileupload", uploader.single("file"), fileUpload);
+router.post("/fileuploads", uploader.array("files"), fileUploadMultiple);
+router.post("/upload", fileUploadWithValidations);
+router.post("/uploads", fileUploadWithValidationsMutiple);

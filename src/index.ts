@@ -1,11 +1,13 @@
 console.log("Typescript")
 import * as dotenv from "dotenv";
 import express from "express";
+import multer from "multer";
 const app = express();
 import mongoose from "mongoose";
 import { router } from "./routes/employee_route.ts";
 app.use(express.json());
-
+var cors = require('cors')
+app.use(cors())
 app.use("/employee", router);
 
 dotenv.config();

@@ -1,4 +1,5 @@
 import Joi from "joi";
+import multer from "multer";
 import { Request, Response, NextFunction, response } from "express";
 import { EmployeeType, ResetPass, Login } from "../Types/employee_types.ts";
 import { verifyTokenData } from "../Utility/token_utility.ts";
@@ -110,4 +111,25 @@ export const verifyToken = (schema: Joi.Schema) => {
       res.status(500).json({ message: message });
     }
   };
+};
+
+export const validateFileUpload = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log(req.file);
+    if (!req.file) {
+      res.status(404).json({ message: "File not found." });
+    } else {
+      next();
+    }
+  } catch (err) {
+    if (err instanceof multer.MulterError) {
+      res.status(500).json({ message: err.message });
+    }
+    const message = err instanceof Error ? err.message : "Unknown error.";
+    res.status(500).json({ message: message });
+  }
 };
